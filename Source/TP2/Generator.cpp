@@ -69,7 +69,8 @@ void AGenerator::Interact(UPrimitiveComponent* HitComponent, ATP2Character* Play
 		if (ScrewCounter == 4 && PlayerItem->ActorHasTag("Battery"))
 		{
 			//Remove the battery from inventory
-			PlayerItem->OriginalLocation = this->GetTransform();
+			PlayerItem->OriginalLocation = Panel->GetComponentTransform();
+			PlayerItem->AttachToComponent(DefaultSceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
 			PlayerItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			Player->DropItem();
 			bIsActive = true;

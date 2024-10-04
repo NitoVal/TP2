@@ -144,7 +144,8 @@ void ATP2Character::PickupItem(AItem* Item)
 	{
 		HeldItem = Item;
 		HeldItem->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		HeldItem->AddActorLocalOffset(HandPosition->GetComponentLocation());
+		HeldItem->SetActorLocation(HandPosition->GetComponentLocation());
+		HeldItem->SetActorRotation(FRotator(0,-90,0));
 	}
 }
 
