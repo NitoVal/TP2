@@ -174,6 +174,7 @@ void ATP2Character::PickupItem(AItem* Item)
 		HeldItem = Item;
 		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 		Item->AttachToActor(this, AttachmentRules, FName("ItemSocket"));
+		Item->AddActorLocalRotation(FRotator(0,-90,0));
 	}
 }
 
