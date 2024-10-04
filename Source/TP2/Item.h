@@ -3,19 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InteractionInterface.h"
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
 UCLASS()
-class TP2_API AItem : public AActor
+class TP2_API AItem : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	AItem();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	bool bIsScrewdriver;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item")
 	FTransform OriginalLocation;
@@ -24,4 +22,6 @@ public:
 	void OnDrop();
 
 	virtual void BeginPlay() override;
+
+	virtual void Interact(UPrimitiveComponent* HitComponent, ATP2Character* Player) override;
 };

@@ -47,6 +47,9 @@ class ATP2Character : public ACharacter
 	
 public:
 	ATP2Character();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	USceneComponent* HandPosition;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	AItem* HeldItem;
@@ -62,8 +65,6 @@ public:
 protected:
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaSeconds) override;
-	void PerformLineTrace();
-	void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 public:
 		

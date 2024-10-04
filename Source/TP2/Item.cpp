@@ -3,16 +3,23 @@
 
 #include "Item.h"
 
+#include "TP2Character.h"
+
 AItem::AItem()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	bIsScrewdriver = false;
 }
 
 void AItem::BeginPlay()
 {
 	OriginalLocation = GetActorTransform();
 }
+
+void AItem::Interact(UPrimitiveComponent* HitComponent, ATP2Character* Player)
+{
+	Player->PickupItem(this);
+}
+
 void AItem::OnDrop()
 {
 	SetActorTransform(OriginalLocation);

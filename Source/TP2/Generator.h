@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InteractionInterface.h"
+#include "TP2Character.h"
 #include "GameFramework/Actor.h"
 #include "Generator.generated.h"
 
@@ -15,26 +16,37 @@ class TP2_API AGenerator : public AActor, public IInteractionInterface
 public:	
 	// Sets default values for this actor's properties
 	AGenerator();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
+	UPROPERTY(VisibleAnywhere, Category="Component")
 	USceneComponent* DefaultSceneRoot;
+
+	UPROPERTY(VisibleAnywhere, Category="Component")
+	UStaticMeshComponent* Box;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
+	UPROPERTY(VisibleAnywhere, Category="Component")
+	USceneComponent* Panel;
+	
+	UPROPERTY(VisibleAnywhere, Category="Component")
 	UStaticMeshComponent* Screw1;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
+	UPROPERTY(VisibleAnywhere, Category="Component")
 	UStaticMeshComponent* Screw2;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
+	UPROPERTY(VisibleAnywhere, Category="Component")
 	UStaticMeshComponent* Screw3;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
+	UPROPERTY(VisibleAnywhere, Category="Component")
 	UStaticMeshComponent* Screw4;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Activation")
+	UPROPERTY(VisibleAnywhere, Category="Component")
+	UStaticMeshComponent* Cover;
+	
+	UPROPERTY(VisibleAnywhere, Category="Generator | Screws")
+	int ScrewCounter;
+
+	UPROPERTY(VisibleAnywhere, Category="Generator | State")
 	bool bIsActive;
+	
+	virtual void Interact(UPrimitiveComponent* HitComponent, ATP2Character* Player) override;
 
-	void ActivateGenerator();
-
-	void Interact() override;
+	virtual void BeginPlay() override;
 };

@@ -37,6 +37,10 @@ ATP2Character::ATP2Character()
 	Mesh1P->CastShadow = false;
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
+	HandPosition = CreateDefaultSubobject<USceneComponent>("HandPosition");
+	HandPosition->SetupAttachment(FirstPersonCameraComponent);
+	
 	HeldItem = nullptr;
 	CurrentInteractable = nullptr;
 }
@@ -47,20 +51,8 @@ void ATP2Character::BeginPlay()
 	Super::BeginPlay();
 }
 
-
-
 void ATP2Character::Tick(float DeltaSeconds)
 {
-	PerformLineTrace();
-}
-
-void ATP2Character::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	if (OtherActor->IsA(AItem::StaticClass()))
-	{
-		AItem* ItemToPickup = Cast<AItem>(OtherActor);
-		PickupItem(ItemToPickup);
-	}
 }
 
 void ATP2Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -117,64 +109,42 @@ void ATP2Character::Look(const FInputActionValue& Value)
 
 void ATP2Character::Interact()
 {
-	if (CurrentInteractable && HeldItem)
+	const FVector StartLocation = FirstPersonCameraComponent->GetComponentTransform().GetLocation();
+	const FVector EndLocation = StartLocation + FirstPersonCameraComponent->GetForwardVector() * 200;
+
+	FCollisionQueryParams CollisionQueryParams;
+	CollisionQueryParams.AddIgnoredActor(this);
+	
+	FHitResult HitResult;
+	bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult,
+		StartLocation,
+		EndLocation,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_WorldDynamic),
+		CollisionQueryParams
+	);
+
+	if (bHit && HitResult.GetActor())
 	{
-		CurrentInteractable->Interact();
-	}
-
-}
-void ATP2Character::PerformLineTrace()
-{
-	// Ensure we have a camera component
-	if (!FirstPersonCameraComponent) return;
-
-	// Get camera location and forward vector
-	FVector CameraLocation = FirstPersonCameraComponent->GetComponentLocation();
-	FVector CameraForward = FirstPersonCameraComponent->GetForwardVector();
-
-	// Define the trace length (200 units forward)
-	float TraceLength = 200.0f;
-
-	// Calculate the end point of the trace
-	FVector TraceEnd = CameraLocation + (CameraForward * TraceLength);
-
-	// Define collision object types (only tracing for WorldDynamic objects)
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
-
-	// Set up trace parameters, ignoring the player
-	FCollisionQueryParams TraceParams(FName(TEXT("LineTrace")), true, this);
-	TraceParams.bTraceComplex = false;
-	TraceParams.AddIgnoredActor(this);
-
-	// Output for the hit result
-	FHitResult OutHit;
-
-	// Perform the line trace (raycast)
-	bool bHit = GetWorld()->LineTraceSingleByObjectType(OutHit,CameraLocation,TraceEnd,FCollisionObjectQueryParams(ObjectTypes),TraceParams);
-
-	// Debug drawing to visualize the trace
-	FColor TraceColor = bHit ? FColor::Green : FColor::Red;
-
-	// Process the hit result
-	if (bHit)
-	{
-		// Log the name of the hit actor (for example)
-		if (OutHit.GetActor())
+		AActor* HitActor = HitResult.GetActor();
+		UPrimitiveComponent* HitComponent = HitResult.GetComponent();
+		if (HitActor->Implements<UInteractionInterface>())
 		{
-			CurrentInteractable = OutHit.GetActor();
+			IInteractionInterface* InteractionActor = Cast<IInteractionInterface>(HitActor);
+			if (InteractionActor && HitComponent)
+			{
+				InteractionActor->Interact(HitComponent, this);
+			}
 		}
 	}
 }
 
 void ATP2Character::PickupItem(AItem* Item)
 {
-	if (HeldItem == nullptr)
+	if (!HeldItem)
 	{
 		HeldItem = Item;
-		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-		Item->AttachToActor(this, AttachmentRules, FName("ItemSocket"));
-		Item->AddActorLocalRotation(FRotator(0,-90,0));
+		HeldItem->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
+		HeldItem->AddActorLocalOffset(HandPosition->GetComponentLocation());
 	}
 }
 
